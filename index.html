@@ -280,6 +280,7 @@ const context = canvas.getContext('2d');
 canvas.width = video.videoWidth;
 canvas.height = video.videoHeight;
 context.drawImage(video, 0, 0, canvas.width, canvas.height);
+console.log('تصویر به canvas کشیده شد. عرض:', canvas.width, 'ارتفاع:', canvas.height);
 processImage();
 }
 
@@ -299,11 +300,20 @@ console.log('خطای جزئیات:', error);
 
 function solveEquation(text) {
 try {
-let expression = text.replace('×', '*').replace('÷', '/').replace(/\s/g, '');
+// فیلتر متن برای فقط اعداد و عملگرهای معتبر
+let expression = text
+.replace(/[^\d+\-*/.]/g, '') // فقط اعداد، عملگرها، و نقطه نگه دار
+.replace(/\s+/g, ''); // فاصله‌ها رو حذف کن
+if (!expression) {
+display.value = 'متن معتبر نیست';
+return;
+}
+console.log('عبارت پردازش‌شده:', expression);
 let result = eval(expression);
 display.value = result.toFixed(4);
 } catch (error) {
 display.value = 'خطا در حل معادله';
+console.log('خطای eval:', error);
 }
 }
 
