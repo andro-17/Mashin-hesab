@@ -247,13 +247,15 @@ alert('مرورگر یا دستگاه از دوربین پشتیبانی نمی�
 return;
 }
 navigator.mediaDevices.getUserMedia({
-video: {
-facingMode: 'environment' // دوربین عقب
-}
+video: { facingMode: 'environment' }
 })
 .then(stream => {
 video.srcObject = stream;
 videoContainer.style.display = 'block';
+video.onloadedmetadata = () => {
+canvas.width = video.videoWidth;
+canvas.height = video.videoHeight;
+};
 })
 .catch(err => {
 alert('خطا در دسترسی به دوربین: ' + err.message);
@@ -270,6 +272,10 @@ videoContainer.style.display = 'none';
 }
 
 function captureImage() {
+if (!video.videoWidth || !video.videoHeight) {
+alert('ویدیو هنوز آماده نیست. دوباره امتحان کنید.');
+return;
+}
 const context = canvas.getContext('2d');
 canvas.width = video.videoWidth;
 canvas.height = video.videoHeight;
@@ -278,13 +284,17 @@ processImage();
 }
 
 async function processImage() {
+try {
 const result = await Tesseract.recognize(canvas.toDataURL(), 'eng+fas', {
 logger: info => console.log(info)
 });
 let text = result.data.text.trim();
 console.log('متن تشخیص داده شده:', text);
 solveEquation(text);
-closeCamera();
+} catch (error) {
+alert('خطا در پردازش تصویر: ' + error.message);
+console.log('خطای جزئیات:', error);
+}
 }
 
 function solveEquation(text) {
